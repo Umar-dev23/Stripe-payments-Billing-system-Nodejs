@@ -1,18 +1,18 @@
-import jwt from "jsonwebtoken";
-import { User } from "../user/user.model.js";
-import ApiError from "./../../errors/ApiError.js";
+import jwt from 'jsonwebtoken';
+import { User } from '../user/user.model.js';
+import ApiError from './../../errors/ApiError.js';
 
 export const verifyCredentials = async (email, password) => {
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
     // Standardizing the error with a 401 status code
-    throw new ApiError(401, "Invalid email or password");
+    throw new ApiError(401, 'Invalid email or password');
   }
 
   const isMatch = await user.isPasswordMatch(password);
   if (!isMatch) {
-    throw new ApiError(401, "Invalid email or password");
+    throw new ApiError(401, 'Invalid email or password');
   }
 
   return user;
