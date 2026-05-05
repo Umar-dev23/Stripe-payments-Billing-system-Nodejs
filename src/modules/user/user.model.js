@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema(
     },
     googleId: { type: String, unique: true, sparse: true },
     stripeCustomerId: { type: String, unique: true, sparse: true },
+    subscriptionId: { type: String, unique: true, sparse: true },
+    planStatus: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
+    
   },
   { timestamps: true },
 );

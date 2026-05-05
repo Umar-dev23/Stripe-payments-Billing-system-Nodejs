@@ -20,15 +20,7 @@ export const verifyCredentials = async (email, password) => {
   return user;
 };
 
-export const register = async ({ name, email, password }) => {
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new ApiError(400, 'Email is already registered');
-  } else {
-    const newUser = await User.create({ name, email, password });
-    return newUser;
-  }
-};
+
 
 export const generateAuthTokens = async (user) => {
   const payload = { sub: user._id, role: user.role };

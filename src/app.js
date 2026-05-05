@@ -5,6 +5,7 @@ import './modules/auth/passport.js'; // Your updated passport config
 import routes from './routes/index.js';
 import cookieParser from 'cookie-parser'; // 1. Import
 import cors from 'cors'; // 2. Import
+import { webHoookListener } from './modules/stripe/webhooks/webhook.handler.js';
 
 const app = express();
 app.use(
@@ -13,6 +14,7 @@ app.use(
     credentials: true, // Allow cookies if you use them
   }),
 );
+app.post('/api/stripe/webhooks', express.raw({ type: 'application/json' }), webHoookListener);
 app.use(express.json());
 app.use(cookieParser());
 
