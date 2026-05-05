@@ -4,9 +4,15 @@ import passport from 'passport';
 import './modules/auth/passport.js'; // Your updated passport config
 import routes from './routes/index.js';
 import cookieParser from 'cookie-parser'; // 1. Import
-const app = express();
+import cors from 'cors'; // 2. Import
 
-// Middlewares
+const app = express();
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL, // Allow your frontend
+    credentials: true, // Allow cookies if you use them
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 

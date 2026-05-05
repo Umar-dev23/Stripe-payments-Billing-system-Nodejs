@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, getProfile, logout, googleAuthRedirect } from '../modules/auth/auth.controller.js';
+import { login, getProfile, logout, googleAuthRedirect, register } from '../modules/auth/auth.controller.js';
 import passport from 'passport';
 import * as authService from '../modules/auth/auth.service.js';
 
@@ -7,6 +7,7 @@ const router = express.Router();
 
 // Public route
 router.post('/login', login);
+router.post('/register', register);
 
 router.get('/profile', passport.authenticate('jwt', { session: false }), getProfile);
 

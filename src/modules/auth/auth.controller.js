@@ -5,7 +5,7 @@ import ApiError from './../../errors/ApiError.js';
 
 export const login = asyncCatch(async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log('Received login data:', req.body);
   if (!email || !password) {
     throw new ApiError(400, 'Email and password are required');
   }
@@ -24,6 +24,21 @@ export const login = asyncCatch(async (req, res, next) => {
     success: true,
     message: 'Login successful',
     user: { id: user._id, email: user.email, role: user.role },
+  });
+});
+
+export const register = asyncCatch(async (req, res, next) => {
+  const { name, email, password } = req.body;
+  console.log('Received registration data:', req.body);
+  if (!name || !email || !password) {
+    throw new ApiError(400, 'Name, email and password are required');
+  }
+
+  const user = await authService.register({ name, email, password });
+
+  res.status(201).json({
+    success: true,
+    message: 'Registration successful',
   });
 });
 

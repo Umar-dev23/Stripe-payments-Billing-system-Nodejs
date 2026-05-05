@@ -11,26 +11,10 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     googleId: { type: String, unique: true, sparse: true },
-    avatar: { type: String },
-    refreshToken: { type: String, select: false },
-
-    // --- NEW GEOSPATIAL FIELD ---
-    location: {
-      type: {
-        type: String,
-        enum: ['Point'], // We force this to only accept 'Point'
-        default: 'Point',
-      },
-      coordinates: {
-        type: [Number], // Expects an array of numbers: [longitude, latitude]
-        default: [0, 0],
-      },
-    },
+    stripeCustomerId: { type: String, unique: true, sparse: true },
   },
   { timestamps: true },
 );
-
-// --- SCHEMA LOGIC ---
 
 // 1. Pre-save hook for passwords
 userSchema.pre('save', async function () {
@@ -45,10 +29,5 @@ userSchema.methods.isPasswordMatch = async function (password) {
   const user = this;
   return bcrypt.compare(password, user.password);
 };
-
-// --- THE GEOSPATIAL INDEX ---
-// This single line is the magic. It tells MongoDB to index the location
-// field for round-earth calculations, allowing lightning-fast queries.
-userSchema.index({ location: '2dsphere' });
 
 export const User = mongoose.model('User', userSchema);

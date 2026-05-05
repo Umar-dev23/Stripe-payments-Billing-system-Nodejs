@@ -2,6 +2,8 @@ import passport from "passport";
 import { Strategy as JwtStrategy } from "passport-jwt";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { User } from "../user/user.model.js";
+import 'dotenv/config';
+
 
 const accessCookieExtractor = (req) => {
   let token = null;
@@ -70,7 +72,6 @@ passport.use(
   }),
 );
 
-// auth.passport.js
 passport.use(
   new GoogleStrategy(
     {

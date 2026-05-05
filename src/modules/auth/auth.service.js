@@ -5,6 +5,8 @@ import ApiError from './../../errors/ApiError.js';
 export const verifyCredentials = async (email, password) => {
   const user = await User.findOne({ email }).select('+password');
 
+  console.log('User found for email:', email, 'User:', password);
+
   if (!user) {
     // Standardizing the error with a 401 status code
     throw new ApiError(401, 'Invalid email or password');
@@ -16,6 +18,16 @@ export const verifyCredentials = async (email, password) => {
   }
 
   return user;
+};
+
+export const register = async ({ name, email, password }) => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new ApiError(400, 'Email is already registered');
+  } else {
+    const newUser = await User.create({ name, email, password });
+    return newUser;
+  }
 };
 
 export const generateAuthTokens = async (user) => {
