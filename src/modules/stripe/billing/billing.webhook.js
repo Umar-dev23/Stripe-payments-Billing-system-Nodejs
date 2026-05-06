@@ -4,14 +4,27 @@ import Subscription from './../../subscription/subscription.model.js';
 import Plans from './../../plans/plans.model.js'; // Import your new Plan model
 import stripe from './../stripe.config.js';
 
-const getSafeDate = (unixTimestamp, addMonths = 0) => {
-  if (unixTimestamp) return new Date(unixTimestamp * 1000);
-  const fallback = new Date();
-  fallback.setMonth(fallback.getMonth() + addMonths);
+const getSafeDate = (unixTimestamp, interval = 'month') => {
+  const now = new Date();
+
+  const offsetInMilliseconds = now.getTimezoneOffset() * 60 * 1000;
+
+  if (unixTimestamp) {
+    const utcDateMs = unixTimestamp * 1000;
+    return new Date(utcDateMs + offsetInMilliseconds);
+  }
+
+  // Fallback logic remains the same
+  const fallback = new Date(); // This is already in Server Local Time
+  if (interval === 'year') {
+    fallback.setFullYear(fallback.getFullYear() + 1);
+  } else {
+    fallback.setMonth(fallback.getMonth() + 1);
+  }
+
   return fallback;
 };
 
-// --- UPDATED CORE UPSERT LOGIC ---
 const upsertSubscriptionToDB = async (stripeSubscription, user) => {
   const customerId = stripeSubscription.customer;
   const subscriptionId = stripeSubscription.id;
@@ -34,7 +47,7 @@ const upsertSubscriptionToDB = async (stripeSubscription, user) => {
     console.error(`CRASH PREVENTED: No Plan found in DB for Stripe Price ID: ${price.id}`);
     return null;
   }
-
+  const interval = price.recurring?.interval || 'month';
   const subscriptionData = {
     userId: user._id,
     planId: planDoc._id, // Save only the MongoDB Plan Reference ID
@@ -42,11 +55,11 @@ const upsertSubscriptionToDB = async (stripeSubscription, user) => {
     stripeCustomerId: customerId,
 
     // Track the interval (month/year) specifically for this subscription
-    interval: price.recurring?.interval || 'month',
+    interval: interval,
 
     status: stripeSubscription.status,
-    currentPeriodStart: getSafeDate(stripeSubscription.current_period_start, 0),
-    currentPeriodEnd: getSafeDate(stripeSubscription.current_period_end, 1),
+    currentPeriodStart: getSafeDate(stripeSubscription.start_date, interval),
+    currentPeriodEnd: getSafeDate(stripeSubscription.current_period_end, interval),
     cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end || false,
     latestInvoiceId: stripeSubscription.latest_invoice,
   };

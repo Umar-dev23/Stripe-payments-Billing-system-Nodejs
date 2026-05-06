@@ -6,6 +6,7 @@ import checkoutRoute from './../modules/stripe/checkout/checkout.routes.js';
 import intentRoute from './../modules/stripe/intents/intent.route.js';
 import billingRoute from './../modules/stripe/billing/billing.routes.js';
 import subscriptionRoute from './../modules/subscription/subscription.route.js';
+import webhookRoute from './../modules/stripe/webhooks/webhook.routes.js';
 import plansRoute from './../modules/plans/plans.route.js';
 
 const router = express.Router();
@@ -23,6 +24,10 @@ const StripeRoutes = [
   {
     path: '/billing',
     route: billingRoute,
+  },
+  {
+    path: '/webhooks',
+    route: webhookRoute,
   },
 ];
 
@@ -42,7 +47,8 @@ const defaultIRoute = [
   {
     path: '/subscription',
     route: subscriptionRoute,
-  },  {
+  },
+  {
     path: '/plans',
     route: plansRoute,
   },

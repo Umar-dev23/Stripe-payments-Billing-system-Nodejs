@@ -7,7 +7,7 @@ const lineItems = [
       product_data: {
         name: 'T-shirt',
       },
-      unit_amount: 49000,
+      unit_amount: 4900,
     },
     quantity: 1,
   },
