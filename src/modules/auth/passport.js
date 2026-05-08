@@ -1,14 +1,14 @@
-import passport from "passport";
-import { Strategy as JwtStrategy } from "passport-jwt";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { User } from "../user/user.model.js";
+import passport from 'passport';
+import { Strategy as JwtStrategy } from 'passport-jwt';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { User } from '../user/user.model.js';
 import 'dotenv/config';
-
+import * as authService from './auth.service.js';
 
 const accessCookieExtractor = (req) => {
   let token = null;
   if (req && req.cookies) {
-    token = req.cookies["accessToken"];
+    token = req.cookies['accessToken'];
   }
   return token;
 };
@@ -16,7 +16,7 @@ const accessCookieExtractor = (req) => {
 const refreshCookieExtractor = (req) => {
   let token = null;
   if (req && req.cookies) {
-    token = req.cookies["refreshToken"];
+    token = req.cookies['refreshToken'];
   }
   return token;
 };
@@ -27,13 +27,11 @@ const accessOptions = {
 };
 
 passport.use(
-  "jwt",
+  'jwt',
   new JwtStrategy(accessOptions, async (jwt_payload, done) => {
     try {
       // .lean() improves performance by returning a plain JS object
-      const user = await User.findById(jwt_payload.sub)
-        .select("-password")
-        .lean();
+      const user = await User.findById(jwt_payload.sub).select('-password').lean();
 
       if (user) {
         return done(null, user);
@@ -51,17 +49,17 @@ const refreshOptions = {
 };
 
 passport.use(
-  "jwt-refresh",
+  'jwt-refresh',
   new JwtStrategy(refreshOptions, async (req, jwt_payload, done) => {
     try {
       // Get the token from the cookie to match it
       const tokenFromCookie = req.cookies?.refreshToken;
 
-      const user = await User.findById(jwt_payload.sub).select("+refreshToken");
+      const user = await User.findById(jwt_payload.sub).select('+refreshToken');
 
       if (!user || user.refreshToken !== tokenFromCookie) {
         return done(null, false, {
-          message: "Invalid or expired refresh token",
+          message: 'Invalid or expired refresh token',
         });
       }
 
@@ -77,13 +75,14 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/api/auth/google/callback",
+      callbackURL: 'http://localhost:3000/api/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await User.findOne({
           $or: [{ googleId: profile.id }, { email: profile.emails[0].value }],
         });
+        const accountId = await authService.createStripeAccount();
 
         if (!user) {
           user = await User.create({
@@ -91,6 +90,7 @@ passport.use(
             name: profile.displayName,
             email: profile.emails[0].value,
             avatar: profile.photos[0].value,
+            stripeAccountId: accountId.id,
           });
         }
         return done(null, user);

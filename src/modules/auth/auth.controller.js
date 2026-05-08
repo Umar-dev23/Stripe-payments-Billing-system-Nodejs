@@ -34,7 +34,9 @@ export const register = asyncCatch(async (req, res, next) => {
     throw new ApiError(400, 'Name, email and password are required');
   }
 
-  const user = await authService.register({ name, email, password });
+  const accountId = await authService.createStripeAccount();
+  const stripeAccountId = accountId.id;
+  const user = await authService.register({ name, email, password, stripeAccountId });
 
   res.status(201).json({
     success: true,
