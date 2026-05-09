@@ -1,21 +1,38 @@
-import mongoose from 'mongoose';
 import app from './app.js';
-import { createServer } from 'http';
-import initlizeSocket from './modules/socket/socket.config.js';
+import { connectDB } from '../db.js';
 
-const PORT = 3000;
-const MONGO_URI = process.env.MONGODB_URI;
-const server = createServer(app);
-const io = initlizeSocket(server);
+// Middleware to ensure DB connection for Serverless requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
 
-app.set('io', io);
+/**
+ * LOCAL DEVELOPMENT LOGIC
+ * Vercel ignores app.listen(), so we only run this if not in production.
+ */
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+  // Use dynamic imports to avoid loading socket/http in serverless environments
+  Promise.all([import('http'), import('./modules/socket/socket.config.js'), connectDB()])
+    .then(([{ createServer }, { default: initlizeSocket }]) => {
+      const server = createServer(app);
+      const io = initlizeSocket(server);
+      app.set('io', io); // Makes IO accessible in routes via req.app.get('io')
+
+      server.listen(PORT, () => {
+        console.log(`🚀 Local Server running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Failed to start local server:', err);
     });
-  })
-  .catch((err) => console.error('❌ DB Connection Error:', err));
+}
+
+// Export for Vercel
+export default app;
