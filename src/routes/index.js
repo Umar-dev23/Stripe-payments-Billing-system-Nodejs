@@ -9,6 +9,7 @@ import subscriptionRoute from './../modules/subscription/subscription.route.js';
 import webhookRoute from './../modules/stripe/webhooks/webhook.routes.js';
 import plansRoute from './../modules/plans/plans.route.js';
 import connectRoute from './../modules/stripe/connect/connect.routes.js';
+import payoutsRoute from './../modules/stripe/payouts/payouts.route.js';
 
 const router = express.Router();
 const stripeSubRouter = express.Router();
@@ -33,6 +34,10 @@ const StripeRoutes = [
   {
     path: '/connect',
     route: connectRoute,
+  },
+  {
+    path: '/payouts',
+    route: payoutsRoute,
   },
 ];
 

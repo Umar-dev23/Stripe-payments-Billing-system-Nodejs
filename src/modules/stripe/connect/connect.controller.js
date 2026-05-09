@@ -1,6 +1,7 @@
 import stripe from '../stripe.config.js';
 import asyncCatch from './../../../utils/asyncCatch.js';
 import * as ConnectService from './connect.service.js';
+import ApiError from './../../../errors/ApiError.js';
 
 export const createOnboardingLink = asyncCatch(async (req, res) => {
   const accountId = req.user.stripeAccountId;
@@ -10,36 +11,32 @@ export const createOnboardingLink = asyncCatch(async (req, res) => {
 
 export const getDashboardData = asyncCatch(async (req, res) => {
   const accountId = req.user.stripeAccountId;
-
   if (!accountId) {
     return res.status(200).json({ success: true, account: null });
   }
-
-  // Fetch both Account details and Balance in parallel
-  const [account, balance] = await Promise.all([
-    stripe.accounts.retrieve(accountId),
-    stripe.balance.retrieve({}, { stripeAccount: accountId }),
-  ]);
-  
-
-  // Extract total available and pending amounts
-  const availableBalance = balance.available.reduce((acc, b) => acc + b.amount, 0);
-  const pendingBalance = balance.pending.reduce((acc, b) => acc + b.amount, 0);
-
-  // Return only what the frontend actually needs
-  const sanitizedAccount = {
-    id: account.id,
-    businessName: account.business_profile?.name || account.settings?.dashboard?.display_name,
-    email: account.email || req.user.email,
-    payoutsEnabled: account.payouts_enabled,
-    chargesEnabled: account.charges_enabled,
-    currency: account.default_currency || 'usd',
-    availableBalance,
-    pendingBalance,
-  };
-
+  const dashboardData = await ConnectService.getDashboardData(accountId);
   res.status(200).json({
     success: true,
-    account: sanitizedAccount,
+    account: dashboardData,
   });
+});
+
+export const testPayment = asyncCatch(async (req, res) => {
+  const accountId = req.user.stripeAccountId;
+  const data = req.body;
+  if (!accountId) {
+    return new ApiError(400, 'No Stripe account linked');
+  }
+  const charge = await ConnectService.testPayment(accountId, data.productPrice);
+
+  res.status(200).json({ success: true, charge });
+});
+
+export const getBalances = asyncCatch(async (req, res) => {
+  const accountId = req.user.stripeAccountId;
+  if (!accountId) {
+    return new ApiError(400, 'No Stripe account linked');
+  }
+  const balances = await ConnectService.getBalances(accountId);
+  res.status(200).json({ success: true, data: balances });
 });
