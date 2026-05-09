@@ -36,7 +36,7 @@ const StripeRoutes = [
     route: connectRoute,
   },
   {
-    path: '/payouts',
+    path: '/payouts', 
     route: payoutsRoute,
   },
 ];
