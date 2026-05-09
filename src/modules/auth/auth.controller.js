@@ -55,7 +55,7 @@ export const googleAuthRedirect = asyncCatch(async (req, res) => {
     maxAge: 604800000,
   });
 
-  res.redirect('http://localhost:5173/');
+  res.redirect(process.env.FRONTEND_URL);
 });
 
 export const logout = asyncCatch(async (req, res) => {
