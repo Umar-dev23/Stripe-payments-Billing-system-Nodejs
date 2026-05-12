@@ -75,7 +75,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'https://stripe-payments-billing-system-node.vercel.app/api/auth/google/callback',
+      callbackURL: 'https://4ll9cl-3000.csb.app/api/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
