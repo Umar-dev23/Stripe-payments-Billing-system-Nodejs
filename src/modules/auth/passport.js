@@ -30,7 +30,8 @@ passport.use(
   'jwt',
   new JwtStrategy(accessOptions, async (jwt_payload, done) => {
     try {
-      // .lean() improves performance by returning a plain JS object
+      console.log('asccess options', accessOptions);
+      console.log('jwt_payload', jwt_payload);
       const user = await User.findById(jwt_payload.sub).select('-password').lean();
 
       if (user) {
