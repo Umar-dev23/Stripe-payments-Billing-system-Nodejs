@@ -14,8 +14,9 @@ export const login = asyncCatch(async (req, res, next) => {
 
   const { accessToken, refreshToken } = await authService.generateAuthTokens(user);
 
-  res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+  res.cookie('accessToken', accessToken, { sameSite: none, httpOnly: true, maxAge: 3600000 });
   res.cookie('refreshToken', refreshToken, {
+    sameSite: none,
     httpOnly: true,
     maxAge: 604800000,
   });
