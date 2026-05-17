@@ -33,6 +33,7 @@ passport.use(
       console.log('asccess options', accessOptions);
       console.log('jwt_payload', jwt_payload);
       const user = await User.findById(jwt_payload.sub).select('-password').lean();
+      console.log('User after Passport found', user);
 
       if (user) {
         return done(null, user);
