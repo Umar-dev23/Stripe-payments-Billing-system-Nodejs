@@ -56,8 +56,15 @@ export const googleAuthRedirect = asyncCatch(async (req, res) => {
 
   const { accessToken, refreshToken } = await authService.generateAuthTokens(user);
 
-  res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+  res.cookie('accessToken', accessToken, {
+    sameSite: 'none', // Added quotes here
+    secure: true, // Crucial addition! Read below
+    httpOnly: true,
+    maxAge: 3600000,
+  });
   res.cookie('refreshToken', refreshToken, {
+    sameSite: 'none', // Added quotes here
+    secure: true, // Crucial addition! Read below
     httpOnly: true,
     maxAge: 604800000,
   });
